@@ -65,7 +65,7 @@ Our primary codebase is a Python toolkit built to support internal investment an
 5680 Greenwood Plaza Blvd · Greenwood Village, Colorado 80111
 📞 (720) 685-6162
 
-📧 [development@shalehaven.com](mailto:dev@shalehaven.com) *(technical inquiries)*
+📧 [dev@shalehaven.com](mailto:dev@shalehaven.com) *(technical inquiries)*
 
 🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](http://shalehaven.cashflowportal.com)
 
