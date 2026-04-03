@@ -19,7 +19,7 @@ We exclusively invest in areas where economic wells have already been drilled an
 ## Investment Strategy
 
 - **Non-Operated Capital Deployment** — We participate as a working interest owner, not an operator, allowing for broad diversification across multiple projects and operators.
-- **Tax-Advantaged Structure** — Investors benefit from Intangible Drilling Cost (IDC) deductions. Shalehaven delivered a **90.7% deduction for 2024 investors**, significantly reducing tax liability.
+- **Tax-Advantaged Structure** — Investors benefit from Intangible Drilling Cost (IDC) deductions. Shalehaven delivered a **90.7% deduction for 2024 & 2025 investors**, significantly reducing tax liability.
 - **Proven Basin Focus** — Capital is placed only in basins with demonstrated production history and established economics.
 - **Low Fee Structure** — Designed to maximize net returns; among the lowest fee structures in the non-operated space.
 - **Passive Income** — While investors are living their lives, the portfolio generates oil and gas revenue — true mailbox money.
@@ -41,16 +41,17 @@ Our primary codebase is a Python toolkit built to support internal investment an
 
 **Core Scripts**
 
-- `main_los.py` — Line-of-sight / geospatial visibility analysis and P&L output; screens pad locations, pipeline routes, and infrastructure conflicts
-- `main_model.py` — Core modeling engine for reservoir simulation, decline curve analysis, and economic modeling
-- `main_prod.py` — Production forecasting, type curve analysis, and cash flow projections
+- `main_los.py` — AFE data aggregation, JIB reconciliation, and revenue tracking across fund years using internal database and company code mapping
+- `main_model.py` — Offset well analysis and AFE modeling via Novi Labs API; reads AFE summaries and retrieves comparable well data for underwriting
+- `main_prod.py` — Production data ETL pipeline; pulls operator production data, formats for ComboCurve upload, and compares against original and updated type curves
 
 **Package Modules (`shalehavenscripts/`)**
 
-- `los.py` — Spatial calculations and LOS utilities
-- `model.py` — Simulation and modeling helpers
-- `production.py` — Production data processing and decline analysis
-- `combocurve.py` — Combo/hybrid type curve generation
+- `los.py` — AFE data combination, folder parsing, and company code mapping utilities
+- `novi.py` — Novi Labs API authentication and well data retrieval for offset analysis
+- `afeleaks.py` — AFE Leaks API integration for well cost and production benchmarking
+- `production.py` — Operator production data import, formatting, and ComboCurve-ready transformations
+- `combocurve.py` — ComboCurve API integration for daily and monthly production data upserts and forecast retrieval
 
 ---
 
@@ -64,7 +65,7 @@ Our primary codebase is a Python toolkit built to support internal investment an
 5680 Greenwood Plaza Blvd · Greenwood Village, Colorado 80111
 📞 (720) 685-6162
 
-📧 [development@shalehaven.com](mailto:development@shalehaven.com) *(technical inquiries)*
+📧 [development@shalehaven.com](mailto:dev@shalehaven.com) *(technical inquiries)*
 
 🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](http://shalehaven.cashflowportal.com)
 
