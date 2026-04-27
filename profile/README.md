@@ -31,6 +31,7 @@ We exclusively invest in areas where economic wells have already been drilled an
 | Repository | Description | Language |
 |---|---|---|
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for shale energy investment analysis — geospatial screening, production modeling, and economic evaluation | Python |
+| [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
@@ -41,17 +42,21 @@ Our primary codebase is a Python toolkit built to support internal investment an
 
 **Core Scripts**
 
-- `main_los.py` — AFE data aggregation, JIB reconciliation, and revenue tracking across fund years using internal database and company code mapping
+- `main_los.py` — AFE data aggregation, JIB reconciliation, AFE-vs-actual reporting, well schedule rollup, and revenue tracking across fund years using internal database and company code mapping
 - `main_model.py` — Offset well analysis and AFE modeling via Novi Labs API; reads AFE summaries and retrieves comparable well data for underwriting
 - `main_prod.py` — Production data ETL pipeline; pulls operator production data, formats for ComboCurve upload, and compares against original and updated type curves
 
 **Package Modules (`shalehavenscripts/`)**
 
-- `los.py` — AFE data combination, folder parsing, and company code mapping utilities
+- `los.py` — AFE / JIB / revenue combination, AFE-vs-actual reconciliation (Power BI Facts + Dimensions), well schedule rollup, folder parsing, and company code mapping utilities
 - `novi.py` — Novi Labs API authentication and well data retrieval for offset analysis
 - `afeleaks.py` — AFE Leaks API integration for well cost and production benchmarking
 - `production.py` — Operator production data import, formatting, and ComboCurve-ready transformations
 - `combocurve.py` — ComboCurve API integration for daily and monthly production data upserts and forecast retrieval
+
+## Shalehaven Rock Quality Index (RQI) Model
+
+Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
 
 ---
 
