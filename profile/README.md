@@ -32,6 +32,7 @@ We exclusively invest in areas where economic wells have already been drilled an
 |---|---|---|
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for shale energy investment analysis — geospatial screening, production modeling, and economic evaluation | Python |
 | [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
+| [shp_delaware](https://github.com/shalehaven/shp_delaware) | Delaware Basin landing-zone viewer — interactive HTML map of Wolfcamp / Bone Spring structure-contour and isopach surfaces from USGS OFR 2020-1126 | Python |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
@@ -57,6 +58,35 @@ Our primary codebase is a Python toolkit built to support internal investment an
 ## Shalehaven Rock Quality Index (RQI) Model
 
 Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
+
+## Delaware Basin Viewer (`shp_delaware`)
+
+A self-contained interactive HTML viewer of the 30 structure-contour and isopach plates published in **USGS Open-File Report 2020-1126** (Wolfcamp / Bone Spring, Delaware Basin), built to support landing-zone scoping for non-operated participation decisions.
+
+**Features**
+
+- Side-by-side structure (depth-to-top) and isopach (thickness) maps for every formation from Leonard Shale down to Wolfcamp D, switchable via dropdown
+- Click any point to drop a marker and populate a depth/thickness table for **all** formations at that location
+- Real-time tooltip showing **Section / Township / Range** (NMPM) on hover for any New Mexico cell
+- Manual lookup form: enter a **Section + Township + Range** (NM) or **Lat/Lon**, plus an optional depth, and the viewer resolves the location, drops the marker, fills the formation table, and identifies which formation contains the entered depth
+- Toggleable overlays: state borders, basin counties (NM + TX), county labels, and the NM 6-mile PLSS township grid
+- Mouse-wheel zoom with linked subplots so the two maps stay in geographic sync
+- Single self-contained HTML file with Plotly inlined — opens on any PC with no internet, CDN, or Python dependency
+
+**Build pipeline (`delaware_basin/`)**
+
+- `catalog.py` — figure → page → formation mapping for all 30 plates
+- `georef.py` — per-page affine fit from PDF graticule labels to lat/lon
+- `extract.py` — pulls every numeric contour label inside the map bbox and converts to control points
+- `surfaces.py` — RBF (thin-plate-spline) interpolation onto a 160×160 grid, masked to the convex hull of control points
+- `geo.py` — fetches and caches state/county GeoJSON; generates the NM PLSS 6-mile grid
+- `viewer.py` — assembles the Plotly figure, lookup form, click/hover handlers, and PLSS hover-grid
+
+**CLI**
+
+```powershell
+python build.py --copy-to default     # rebuilds and syncs to OneDrive
+```
 
 ---
 
