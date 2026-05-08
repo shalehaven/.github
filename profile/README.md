@@ -33,6 +33,7 @@ We exclusively invest in areas where economic wells have already been drilled an
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for shale energy investment analysis — geospatial screening, production modeling, and economic evaluation | Python |
 | [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
 | [shp_delaware](https://github.com/shalehaven/shp_delaware) | Delaware Basin landing-zone viewer — interactive HTML map of Wolfcamp / Bone Spring structure-contour and isopach surfaces from USGS OFR 2020-1126 | Python |
+| [shp_powder](https://github.com/shalehaven/shp_powder) | Powder River Basin Upper Cretaceous viewer — interactive HTML map of structure and isopach surfaces from Fox Hills down to the Muddy Sandstone, built from WSGS OFR 2020-09 | Python |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
@@ -86,6 +87,36 @@ A self-contained interactive HTML viewer of the 30 structure-contour and isopach
 
 ```powershell
 python build.py --copy-to default     # rebuilds and syncs to OneDrive
+```
+
+## Powder River Basin Viewer (`shp_powder`)
+
+A self-contained interactive HTML viewer of the Upper Cretaceous structure and thickness maps published in **WSGS Open-File Report 2020-09** (Powder River Basin, Wyoming), built to support landing-zone scoping and offset evaluation across the PRB stack.
+
+**Features**
+
+- 15-entry dropdown spanning the Upper Cretaceous column from **Fox Hills Sandstone** (top + base) down through Teckla, Teapot, Red Bird-Parkman, Sussex, Shannon, Niobrara, Sage Breaks-Carlile, Turner-Wall Creek, Pool Creek, Greenhorn, Belle Fourche, Mowry / Mowry-Shell Creek, and the **Muddy Sandstone**
+- Side-by-side structure (depth-below-surface) and thickness maps with paired structure / isopach surfaces wherever WSGS published both
+- Optional overlay of the WSGS-published thickness contour lines pulled directly from the report's geodatabase
+- RBF-interpolated surfaces built from WSGS well-tops, with explicit base-column or next-deeper-top fallback for thickness derivation
+- City reference markers (Sheridan, Buffalo, Gillette, Casper, Douglas, Lusk, Sundance) and basin-extent grid scoped to the Wyoming PRB
+- Single self-contained HTML file with Plotly inlined — opens on any PC with no internet, CDN, or Python dependency
+
+**Build pipeline (`prb_viewer/`)**
+
+- `catalog.py` — 28-figure → 15-dropdown mapping, formation specs (top / base / next-deeper-key), thickness overrides, and contour-layer registry for the .gdb
+- `data_loader.py` — discovers and loads WSGS well-tops from .gdb / .csv / .xlsx (with optional AFELeaks fallback) plus the published contour-line layers
+- `surfaces.py` — RBF (thin-plate-spline) interpolation onto a basin-extent grid, with contour-derived fallback for formations missing a base column
+- `geo.py` — state / county GeoJSON fetch and Wyoming PRB clipping
+- `reference.py` — extracts the WSGS reference plates from the source PDF for in-viewer comparison
+- `pipeline.py` — orchestrates tops → surfaces → reference imagery → HTML
+- `viewer.py` — assembles the Plotly figure, dropdown, click/hover handlers, and JSON-serialized surface payloads for client-side bilinear interpolation
+
+**CLI**
+
+```powershell
+python build.py                       # produces prb_uppercret_viewer.html
+python build.py --no-afeleaks -v      # WSGS-only sources, verbose logging
 ```
 
 ---
