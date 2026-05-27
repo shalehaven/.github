@@ -32,8 +32,10 @@ We exclusively invest in areas where economic wells have already been drilled an
 |---|---|---|
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for shale energy investment analysis — geospatial screening, production modeling, and economic evaluation | Python |
 | [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
+| [shp_research](https://github.com/shalehaven/shp_research) | Well & operator benchmarking dashboard — Streamlit app over the weekly NoviLabs warehouse (DuckDB): type curves, completion-vs-performance, geology-normalized operator skill, well cards, and gun-barrel subsurface spacing | Python |
 | [shp_delaware](https://github.com/shalehaven/shp_delaware) | Delaware Basin landing-zone viewer — interactive HTML map of Wolfcamp / Bone Spring structure-contour and isopach surfaces from USGS OFR 2020-1126 | Python |
 | [shp_powder](https://github.com/shalehaven/shp_powder) | Powder River Basin Upper Cretaceous viewer — interactive HTML map of structure and isopach surfaces from Fox Hills down to the Muddy Sandstone, built from WSGS OFR 2020-09 | Python |
+| [shp_admin](https://github.com/shalehaven/shp_admin) | Internal operations portal — Next.js / TypeScript app (Microsoft Entra SSO) surfacing operational reports | TypeScript |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
@@ -59,6 +61,21 @@ Our primary codebase is a Python toolkit built to support internal investment an
 ## Shalehaven Rock Quality Index (RQI) Model
 
 Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
+
+## Benchmarking Dashboard (`shp_research`)
+
+A Streamlit research tool for benchmarking operators and wells by **basin / subbasin / formation**, built on the weekly NoviLabs *US Horizontals* extract. A DuckDB-over-Parquet warehouse is rebuilt from the raw weekly drop, giving sub-second analytical SQL over 29M+ monthly-production rows.
+
+**Features**
+
+- **Type curves** — normalized P10 / P50 / P90 production decline by operator or vintage, oil and gas tracked separately (per 1,000 ft lateral)
+- **Completion vs. performance** — proppant / fluid / stage-spacing intensity against productivity, with an in-cohort regression fit
+- **Geology-normalized operator skill** — a within-cohort regression of production on rock + completion separates operating skill from acreage quality, reporting the cross-validated R² so the ranking's trust is explicit
+- **Well cards** — paste a set of API10s to get per-well summary cards compared to their cohort median
+- **Gun barrel** — pick a reference well (map click or API10) and see a subsurface cross-section of nearby laterals, revealing bench stacking and spacing within the unit
+- **Oil/gas-first metrics** — BOE is deliberately secondary; gas drives returns in the Haynesville/Marcellus and is near-worthless in the oily Delaware, so each stream is benchmarked on its own
+
+**Private repository — internal use only.**
 
 ## Delaware Basin Viewer (`shp_delaware`)
 
@@ -118,6 +135,19 @@ A self-contained interactive HTML viewer of the Upper Cretaceous structure and t
 python build.py                       # produces prb_uppercret_viewer.html
 python build.py --no-afeleaks -v      # WSGS-only sources, verbose logging
 ```
+
+## Operations Portal (`shp_admin`)
+
+An internal **Next.js / TypeScript** web portal that surfaces Shalehaven's operational reports (AFE / JIB / production workflows) behind **Microsoft Entra single sign-on**. Built on the App Router with Tailwind CSS.
+
+**CLI**
+
+```bash
+npm install
+npm run dev        # http://localhost:3000
+```
+
+**Private repository — internal use only.**
 
 ---
 

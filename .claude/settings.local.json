@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Item \"C:\\\\Users\\\\Michael Tanner\\\\code\\\\shp_powder\\\\README.md\" | Select-Object Length; \"---\"; Get-Content -Raw -LiteralPath \"C:\\\\Users\\\\Michael Tanner\\\\code\\\\shp_powder\\\\README.md\")"
+    ]
+  }
+}
