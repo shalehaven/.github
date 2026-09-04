@@ -167,7 +167,7 @@ npm run dev        # http://localhost:3000
 5680 Greenwood Plaza Blvd · Greenwood Village, Colorado 80111
 📞 (720) 685-6162
 
-📧 [dev@shalehaven.com](mailto:dev@shalehaven.com) *(technical inquiries)*
+📧 [development@shalehaven.com](mailto:development@shalehaven.com) *(technical inquiries)*
 
 🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](https://shalehaven.cashflowportal.com)
 
