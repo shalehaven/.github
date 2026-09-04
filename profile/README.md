@@ -30,7 +30,7 @@ We exclusively invest in areas where economic wells have already been drilled an
 
 | Repository | Description | Language |
 |---|---|---|
-| [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for shale energy investment analysis — geospatial screening, production modeling, and economic evaluation | Python |
+| [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for technical underwriting, economics, production and accounting ETL, spatial analysis, and operational reporting | Python |
 | [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
 | [shp_research](https://github.com/shalehaven/shp_research) | Well & operator benchmarking dashboard — Streamlit app over the weekly NoviLabs warehouse (DuckDB): type curves, completion-vs-performance, geology-normalized operator skill, well cards, and gun-barrel subsurface spacing | Python |
 | [shp_delaware](https://github.com/shalehaven/shp_delaware) | Delaware Basin landing-zone viewer — interactive HTML map of Wolfcamp / Bone Spring structure-contour and isopach surfaces from USGS OFR 2020-1126 | Python |
@@ -42,21 +42,27 @@ We exclusively invest in areas where economic wells have already been drilled an
 
 ## ShalehavenScripts Overview
 
-Our primary codebase is a Python toolkit built to support internal investment analysis and operational workflows.
+Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, accounting reconciliation, and reporting. Novi data is maintained in local SQL Server and TSV stores; ComboCurve provides type-curve, production, and economic-model integration.
 
 **Core Scripts**
 
-- `main_los.py` — AFE data aggregation, JIB reconciliation, AFE-vs-actual reporting, well schedule rollup, and revenue tracking across fund years using internal database and company code mapping
-- `main_model.py` — Offset well analysis and AFE modeling via Novi Labs API; reads AFE summaries and retrieves comparable well data for underwriting
-- `main_prod.py` — Production data ETL pipeline; pulls operator production data, formats for ComboCurve upload, and compares against original and updated type curves
+- `main_run.py` — Daily orchestrator for the production and LOS pipelines, with independent subprocess execution and SQL-backed run logging
+- `main_los.py` — AFE, JIB, and revenue ETL; AFE-vs-actual reconciliation; Lease Operating Statement reporting; and parallel Excel/SQL publishing
+- `main_model.py` — Interactive AFE underwriting pipeline: auction or workbook ingestion, radius-peer or ComboCurve type-curve cohorts, lateral-length normalization, geologic diagnostics, economics PDF/email delivery, and optional operator analysis
+- `main_prod.py` — Full production workflow with deal-pipeline and Novi-refresh modes, operator-file normalization, ComboCurve uploads, actual-vs-type-curve analysis, SQL/Power BI publishing, and the seven-day production report
 
 **Package Modules (`shalehavenscripts/`)**
 
-- `los.py` — AFE / JIB / revenue combination, AFE-vs-actual reconciliation (Power BI Facts + Dimensions), well schedule rollup, folder parsing, and company code mapping utilities
-- `novi.py` — Novi Labs API authentication and well data retrieval for offset analysis
-- `afeleaks.py` — AFE Leaks API integration for well cost and production benchmarking
-- `production.py` — Operator production data import, formatting, and ComboCurve-ready transformations
-- `combocurve.py` — ComboCurve API integration for daily and monthly production data upserts and forecast retrieval
+- `auction.py` — Auction-export ingestion and AFE Summary project scaffolding
+- `los.py` — AFE, JIB, revenue, AFE-vs-actual, well-schedule, and LOS processing
+- `novi.py` — Local Novi warehouse refresh/read layer, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
+- `economics.py` — Per-well and portfolio economics, ComboCurve assumption resolution, report generation, and email distribution
+- `production.py` — Operator production importers, ComboCurve-ready transformations, surveillance reporting, and Power BI publishing
+- `combocurve.py` — ComboCurve client for company/project wells, representative type curves, production, forecasts, and economic models
+- `dealsheet.py` — Deal-pipeline ingestion and reporting
+- `sql.py` — SQL Server access for the Novi and Shalehaven databases, including staged loads and atomic Power BI view swaps
+- `gis.py` — SQL Server spatial-layer publishing for live QGIS use
+- `afeleaks.py` — AFE Leaks integration for well cost, production, and financial benchmarking
 
 ## Shalehaven Rock Quality Index (RQI) Model
 
@@ -163,7 +169,7 @@ npm run dev        # http://localhost:3000
 
 📧 [dev@shalehaven.com](mailto:dev@shalehaven.com) *(technical inquiries)*
 
-🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](http://shalehaven.cashflowportal.com)
+🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](https://shalehaven.cashflowportal.com)
 
 ---
 
