@@ -10,19 +10,7 @@
 
 ## About Us
 
-Shalehaven Partners is a Dallas-based private oil and gas investment firm specializing in **tax-advantaged, non-operated working interests** in proven shale basins across the United States. Our mission is to build long-term relationships with investor partners by delivering significant annual tax savings and above-market returns through disciplined capital deployment in drill-ready, economically proven projects.
-
-We exclusively invest in areas where economic wells have already been drilled and produced successfully — ensuring investor capital is diversified across a portfolio of proven, de-risked wells.
-
----
-
-## Investment Strategy
-
-- **Non-Operated Capital Deployment** — We participate as a working interest owner, not an operator, allowing for broad diversification across multiple projects and operators.
-- **Tax-Advantaged Structure** — Investors benefit from Intangible Drilling Cost (IDC) deductions. Shalehaven delivered a **90.7% deduction for 2024 & 2025 investors**, significantly reducing tax liability.
-- **Proven Basin Focus** — Capital is placed only in basins with demonstrated production history and established economics.
-- **Low Fee Structure** — Designed to maximize net returns; among the lowest fee structures in the non-operated space.
-- **Passive Income** — While investors are living their lives, the portfolio generates oil and gas revenue — true mailbox money.
+Shalehaven Partners is a Dallas-based private oil and gas investment firm focused on deploying capital into **non-operated working interest** projects, both producing assets and non-producing AFE opportunities. Our goal is to leverage our robust balance sheet, our subject-matter expertise in energy, and our technology infrastructure to generate significant alpha for our LPs.
 
 ---
 
@@ -31,42 +19,77 @@ We exclusively invest in areas where economic wells have already been drilled an
 | Repository | Description | Language |
 |---|---|---|
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for technical underwriting, economics, production and accounting ETL, spatial analysis, and operational reporting | Python |
-| [shp_rqi](https://github.com/shalehaven/shp_rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
+| [rqi](https://github.com/shalehaven/rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
+| [shalehaven-platform](https://github.com/shalehaven/shalehaven-platform) | Shalehaven's AI platform — an MCP server that gives Claude secure access to our well, production, finance and deal data, behind Microsoft Entra sign-in, with a small admin console | TypeScript |
+| [shp_pud](https://github.com/shalehaven/shp_pud) | PUD location generator — learns how each operator develops each landing zone from the Novi well database, fills undrilled space across eleven Lower 48 basins with laterals that follow that practice, back-tests against wells drilled since, and prices every location through the ShalehavenScripts economics model | Python |
 | [shp_research](https://github.com/shalehaven/shp_research) | Well & operator benchmarking dashboard — Streamlit app over the weekly NoviLabs warehouse (DuckDB): type curves, completion-vs-performance, geology-normalized operator skill, well cards, and gun-barrel subsurface spacing | Python |
-| [shp_delaware](https://github.com/shalehaven/shp_delaware) | Delaware Basin landing-zone viewer — interactive HTML map of Wolfcamp / Bone Spring structure-contour and isopach surfaces from USGS OFR 2020-1126 | Python |
-| [shp_powder](https://github.com/shalehaven/shp_powder) | Powder River Basin Upper Cretaceous viewer — interactive HTML map of structure and isopach surfaces from Fox Hills down to the Muddy Sandstone, built from WSGS OFR 2020-09 | Python |
-| [shp_admin](https://github.com/shalehaven/shp_admin) | Internal operations portal — Next.js / TypeScript app (Microsoft Entra SSO) surfacing operational reports | TypeScript |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
 
 ## ShalehavenScripts Overview
 
-Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, accounting reconciliation, and reporting. Novi data is maintained in local SQL Server and TSV stores; ComboCurve provides type-curve, production, and economic-model integration.
+Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, hedging, accounting reconciliation, and reporting. Novi data lives in a weekly-refreshed SQL Server warehouse; ComboCurve provides type-curve, production, forecast, and economic-model integration. Reporting has moved off Power BI onto self-contained HTML dashboards, refreshed from SQL with one click.
 
 **Core Scripts**
 
-- `main_run.py` — Daily orchestrator for the production and LOS pipelines, with independent subprocess execution and SQL-backed run logging
-- `main_los.py` — AFE, JIB, and revenue ETL; AFE-vs-actual reconciliation; Lease Operating Statement reporting; and parallel Excel/SQL publishing
-- `main_model.py` — Interactive AFE underwriting pipeline: auction or workbook ingestion, radius-peer or ComboCurve type-curve cohorts, lateral-length normalization, geologic diagnostics, economics PDF/email delivery, and optional operator analysis
-- `main_prod.py` — Full production workflow with deal-pipeline and Novi-refresh modes, operator-file normalization, ComboCurve uploads, actual-vs-type-curve analysis, SQL/Power BI publishing, and the seven-day production report
+- `main_run.py` — Daily orchestrator for the capital formation, production, and LOS pipelines (plus a weekly hedge-volume pull), with independent subprocess execution, a run lock, and SQL-backed run logging
+- `main_capital.py` — Publishes the investor tracker to SQL for capital formation reporting
+- `main_prod.py` — Full production run: deal pipeline, ComboCurve push/pull, operator-file normalization, downtime capture, the seven-day production report, and SQL merges
+- `main_los.py` — Well schedule, AFE, JIB, and revenue ETL; AFE-vs-actual reconciliation; and Lease Operating Statement reporting
+- `main_model.py` — AFE underwriting pipeline: auction or workbook ingestion, ComboCurve type-curve or radius-peer cohorts (per-zone widening ladder), Novi-calibrated lateral-length scaling, economics HTML/PDF and email delivery, with geology and operator analysis built alongside
+- `main_geology.py` — Builds a deal's regional geology report on its own, without running the model
 
 **Package Modules (`shalehavenscripts/`)**
 
+- `economics.py` — Per-well and portfolio economics (P10/P50/P90), ComboCurve assumption resolution, sensitivities, goal seek, and report generation
+- `orri.py` — ORRI sell-down analysis: what an overriding royalty carved out of the lease NRI is worth to a buyer, and what selling it does to the retained working interest
+- `lateral_scaling.py` / `normalization.py` — Novi-calibrated lateral-length scaling exponents per basin × formation × county, and a standalone lateral-normalization study
+- `geology.py` — Regional geology deep-dive per landing zone, with statistically gated drivers of well performance
+- `novi.py` — Novi warehouse refresh/read layer, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
 - `auction.py` — Auction-export ingestion and AFE Summary project scaffolding
-- `los.py` — AFE, JIB, revenue, AFE-vs-actual, well-schedule, and LOS processing
-- `novi.py` — Local Novi warehouse refresh/read layer, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
-- `economics.py` — Per-well and portfolio economics, ComboCurve assumption resolution, report generation, and email distribution
-- `production.py` — Operator production importers, ComboCurve-ready transformations, surveillance reporting, and Power BI publishing
-- `combocurve.py` — ComboCurve client for company/project wells, representative type curves, production, forecasts, and economic models
-- `dealsheet.py` — Deal-pipeline ingestion and reporting
-- `sql.py` — SQL Server access for the Novi and Shalehaven databases, including staged loads and atomic Power BI view swaps
-- `gis.py` — SQL Server spatial-layer publishing for live QGIS use
-- `afeleaks.py` — AFE Leaks integration for well cost, production, and financial benchmarking
+- `afedatabase.py` — Registry of every modeled well's AFE for cost benchmarking
+- `combocurve.py` — ComboCurve client for wells, type curves, production, forecasts (including auto-forecast), directional surveys, and economic models
+- `production.py` — Operator production importers, ComboCurve-ready transformations, downtime capture, and the production dashboard
+- `hedging.py` — Swaps-only hedge book per fund, built from final deal economics and actuals, priced on the strip
+- `finance.py` — Loads every won deal's final economics into SQL for fund-level forecasts and returns
+- `los.py` / `wellschedule.py` — AFE, JIB, revenue, AFE-vs-actual, LOS, and well-schedule processing
+- `capitalformation.py` / `dealsheet.py` — Investor tracker and deal-pipeline ingestion and reporting
+- `rigwatch.py` / `timelapse.py` — Weekly rig activity near won deals, and an animated basin-development time-lapse
+- `pud_scores.py` — Review page for PUD locations priced through the model (see `shp_pud` below)
+- `sql.py` / `gis.py` — SQL Server access (staged loads, atomic view swaps, run logging) and spatial layers for live QGIS use
+- `tech.py` — Shared mail, branding, machine setup, and the `shalehaven://` link handler that lets report buttons run jobs
+- `ui/` — HTML report builders and their client-side JavaScript
+
+**HTML Reports**
+
+- **Economics report** — one self-contained page per deal with live, in-browser recalculation: Summary (editable cash promote / carry, per-well grid), AFE Overview, Assumptions, Cash Flow / Zone, Rollup, Sensitivity, Goal Seek, Risk Profile, and **ORRI** (value of selling down the lease NRI as an overriding royalty, with a buyer-discount-rate control and a PDF export)
+- **Operations dashboards** — production, deal pipeline, AFE vs actual, LOS, and hedge book, each refreshed from SQL by a button on the page
+- **Admin page** — every pipeline and load as a one-click job with live status, last-run history, and a status window that streams progress
+- **Model Runs page** — every AFE Summary in the current fund grouped by deal stage, with Run / Final buttons that launch the model directly
 
 ## Shalehaven Rock Quality Index (RQI) Model
 
 Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
+
+## PUD Location Generator (`shp_pud`)
+
+Shalehaven's in-house undrilled-inventory engine, built to replace a paid inventory product with something we own and can calibrate. For each basin it learns how every operator actually develops every landing zone (in-zone spacing, stagger, lateral-length mix, 3-mile practice, wells per section) from the Novi horizontal-well database, then fills the undrilled space with laterals that follow that practice.
+
+**Coverage** — eleven Lower 48 basins: Delaware, Midland, Williston, DJ, Eagle Ford, Haynesville, Marcellus, Utica, Anadarko, Uinta, and Powder River.
+
+**How it works**
+
+- **Resolve and learn** — generic formation tags are resolved to a landing zone, then spacing, stagger, and lateral rules are learned per operator × zone, falling back to operator, basin-zone, and basin levels
+- **Place** — sticks hang off existing wells at the operator's spacing, cut on real drilling units (PLSS sections in New Mexico, RRC surveys in Texas), and trimmed to free space around every producing, DUC, and permitted lateral
+- **Attribute** — each location carries its operator, lateral class, permit signal, parent wells, and any acreage-ownership gap along the stick (flagged as a leasing target, never a blocker)
+- **Categorize** — `PUD` inside the proven play, or `EMERGING` for step-outs and stacked pay
+- **Back-test** — every run is replayed as of an earlier date and scored on recall and precision against the wells drilled since
+- **Publish** — results go to SQL Server with stable names across runs, a live multi-basin QGIS project, and a weekly refresh after each Novi load
+
+**Scoring** — every location can be exported as an AFE Summary (capex fit from Shalehaven's own AFEs) and run unattended through the ShalehavenScripts economics model. Results are stored per location, with expected deal terms applied per basin, and reviewed on a scores dashboard.
+
+**Private repository — internal use only.**
 
 ## Benchmarking Dashboard (`shp_research`)
 
@@ -80,78 +103,6 @@ A Streamlit research tool for benchmarking operators and wells by **basin / subb
 - **Well cards** — paste a set of API10s to get per-well summary cards compared to their cohort median
 - **Gun barrel** — pick a reference well (map click or API10) and see a subsurface cross-section of nearby laterals, revealing bench stacking and spacing within the unit
 - **Oil/gas-first metrics** — BOE is deliberately secondary; gas drives returns in the Haynesville/Marcellus and is near-worthless in the oily Delaware, so each stream is benchmarked on its own
-
-**Private repository — internal use only.**
-
-## Delaware Basin Viewer (`shp_delaware`)
-
-A self-contained interactive HTML viewer of the 30 structure-contour and isopach plates published in **USGS Open-File Report 2020-1126** (Wolfcamp / Bone Spring, Delaware Basin), built to support landing-zone scoping for non-operated participation decisions.
-
-**Features**
-
-- Side-by-side structure (depth-to-top) and isopach (thickness) maps for every formation from Leonard Shale down to Wolfcamp D, switchable via dropdown
-- Click any point to drop a marker and populate a depth/thickness table for **all** formations at that location
-- Real-time tooltip showing **Section / Township / Range** (NMPM) on hover for any New Mexico cell
-- Manual lookup form: enter a **Section + Township + Range** (NM) or **Lat/Lon**, plus an optional depth, and the viewer resolves the location, drops the marker, fills the formation table, and identifies which formation contains the entered depth
-- Toggleable overlays: state borders, basin counties (NM + TX), county labels, and the NM 6-mile PLSS township grid
-- Mouse-wheel zoom with linked subplots so the two maps stay in geographic sync
-- Single self-contained HTML file with Plotly inlined — opens on any PC with no internet, CDN, or Python dependency
-
-**Build pipeline (`delaware_basin/`)**
-
-- `catalog.py` — figure → page → formation mapping for all 30 plates
-- `georef.py` — per-page affine fit from PDF graticule labels to lat/lon
-- `extract.py` — pulls every numeric contour label inside the map bbox and converts to control points
-- `surfaces.py` — RBF (thin-plate-spline) interpolation onto a 160×160 grid, masked to the convex hull of control points
-- `geo.py` — fetches and caches state/county GeoJSON; generates the NM PLSS 6-mile grid
-- `viewer.py` — assembles the Plotly figure, lookup form, click/hover handlers, and PLSS hover-grid
-
-**CLI**
-
-```powershell
-python build.py --copy-to default     # rebuilds and syncs to OneDrive
-```
-
-## Powder River Basin Viewer (`shp_powder`)
-
-A self-contained interactive HTML viewer of the Upper Cretaceous structure and thickness maps published in **WSGS Open-File Report 2020-09** (Powder River Basin, Wyoming), built to support landing-zone scoping and offset evaluation across the PRB stack.
-
-**Features**
-
-- 15-entry dropdown spanning the Upper Cretaceous column from **Fox Hills Sandstone** (top + base) down through Teckla, Teapot, Red Bird-Parkman, Sussex, Shannon, Niobrara, Sage Breaks-Carlile, Turner-Wall Creek, Pool Creek, Greenhorn, Belle Fourche, Mowry / Mowry-Shell Creek, and the **Muddy Sandstone**
-- Side-by-side structure (depth-below-surface) and thickness maps with paired structure / isopach surfaces wherever WSGS published both
-- Optional overlay of the WSGS-published thickness contour lines pulled directly from the report's geodatabase
-- RBF-interpolated surfaces built from WSGS well-tops, with explicit base-column or next-deeper-top fallback for thickness derivation
-- City reference markers (Sheridan, Buffalo, Gillette, Casper, Douglas, Lusk, Sundance) and basin-extent grid scoped to the Wyoming PRB
-- Single self-contained HTML file with Plotly inlined — opens on any PC with no internet, CDN, or Python dependency
-
-**Build pipeline (`prb_viewer/`)**
-
-- `catalog.py` — 28-figure → 15-dropdown mapping, formation specs (top / base / next-deeper-key), thickness overrides, and contour-layer registry for the .gdb
-- `data_loader.py` — discovers and loads WSGS well-tops from .gdb / .csv / .xlsx (with optional AFELeaks fallback) plus the published contour-line layers
-- `surfaces.py` — RBF (thin-plate-spline) interpolation onto a basin-extent grid, with contour-derived fallback for formations missing a base column
-- `geo.py` — state / county GeoJSON fetch and Wyoming PRB clipping
-- `reference.py` — extracts the WSGS reference plates from the source PDF for in-viewer comparison
-- `pipeline.py` — orchestrates tops → surfaces → reference imagery → HTML
-- `viewer.py` — assembles the Plotly figure, dropdown, click/hover handlers, and JSON-serialized surface payloads for client-side bilinear interpolation
-
-**CLI**
-
-```powershell
-python build.py                       # produces prb_uppercret_viewer.html
-python build.py --no-afeleaks -v      # WSGS-only sources, verbose logging
-```
-
-## Operations Portal (`shp_admin`)
-
-An internal **Next.js / TypeScript** web portal that surfaces Shalehaven's operational reports (AFE / JIB / production workflows) behind **Microsoft Entra single sign-on**. Built on the App Router with Tailwind CSS.
-
-**CLI**
-
-```bash
-npm install
-npm run dev        # http://localhost:3000
-```
 
 **Private repository — internal use only.**
 
@@ -169,15 +120,7 @@ npm run dev        # http://localhost:3000
 
 📧 [development@shalehaven.com](mailto:development@shalehaven.com) *(technical inquiries)*
 
-🌐 [shalehaven.com](https://shalehaven.com) · [Investor Portal](https://shalehaven.cashflowportal.com)
-
----
-
-## Connect
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Shalehaven%20Partners-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/company/shalehaven-partners-energy-asset-management-llc/)
-[![Facebook](https://img.shields.io/badge/Facebook-Shalehaven%20Partners-1877F2?style=flat-square&logo=facebook)](https://www.facebook.com/people/Shalehaven-Partners/61565687158968/)
-[![Instagram](https://img.shields.io/badge/Instagram-@shalehaven-E4405F?style=flat-square&logo=instagram)](https://www.instagram.com/shalehaven/)
+🌐 [shalehaven.com](https://shalehaven.com)
 
 ---
 
