@@ -29,7 +29,7 @@ Shalehaven Partners is a Dallas-based private oil and gas investment firm focuse
 
 ## ShalehavenScripts Overview
 
-Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, hedging, accounting reconciliation, and reporting. Novi data lives in a weekly-refreshed SQL Server warehouse; ComboCurve provides type-curve, production, forecast, and economic-model integration. Reporting has moved off Power BI onto self-contained HTML dashboards, refreshed from SQL with one click.
+Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, hedging, accounting reconciliation, and reporting. Third-party well data lives in a weekly-refreshed SQL Server warehouse; ComboCurve provides type-curve, production, forecast, and economic-model integration. Reporting has moved off Power BI onto self-contained HTML dashboards, refreshed from SQL with one click.
 
 **Core Scripts**
 
@@ -37,16 +37,16 @@ Our primary codebase is a Python toolkit supporting the full internal workflow f
 - `main_capital.py` — Publishes the investor tracker to SQL for capital formation reporting
 - `main_prod.py` — Full production run: deal pipeline, ComboCurve push/pull, operator-file normalization, downtime capture, the seven-day production report, and SQL merges
 - `main_los.py` — Well schedule, AFE, JIB, and revenue ETL; AFE-vs-actual reconciliation; and Lease Operating Statement reporting
-- `main_model.py` — AFE underwriting pipeline: auction or workbook ingestion, ComboCurve type-curve or radius-peer cohorts (per-zone widening ladder), Novi-calibrated lateral-length scaling, economics HTML/PDF and email delivery, with geology and operator analysis built alongside
+- `main_model.py` — AFE underwriting pipeline: auction or workbook ingestion, ComboCurve type-curve or radius-peer cohorts (per-zone widening ladder), data-calibrated lateral-length scaling, economics HTML/PDF and email delivery, with geology and operator analysis built alongside
 - `main_geology.py` — Builds a deal's regional geology report on its own, without running the model
 
 **Package Modules (`shalehavenscripts/`)**
 
 - `economics.py` — Per-well and portfolio economics (P10/P50/P90), ComboCurve assumption resolution, sensitivities, goal seek, and report generation
 - `orri.py` — ORRI sell-down analysis: what an overriding royalty carved out of the lease NRI is worth to a buyer, and what selling it does to the retained working interest
-- `lateral_scaling.py` / `normalization.py` — Novi-calibrated lateral-length scaling exponents per basin × formation × county, and a standalone lateral-normalization study
+- `lateral_scaling.py` / `normalization.py` — Data-calibrated lateral-length scaling exponents per basin × formation × county, and a standalone lateral-normalization study
 - `geology.py` — Regional geology deep-dive per landing zone, with statistically gated drivers of well performance
-- `novi.py` — Novi warehouse refresh/read layer, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
+- **Well-data layer** — Weekly warehouse refresh/read, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
 - `auction.py` — Auction-export ingestion and AFE Summary project scaffolding
 - `afedatabase.py` — Registry of every modeled well's AFE for cost benchmarking
 - `combocurve.py` — ComboCurve client for wells, type curves, production, forecasts (including auto-forecast), directional surveys, and economic models
@@ -68,13 +68,15 @@ Our primary codebase is a Python toolkit supporting the full internal workflow f
 - **Admin page** — every pipeline and load as a one-click job with live status, last-run history, and a status window that streams progress
 - **Model Runs page** — every AFE Summary in the current fund grouped by deal stage, with Run / Final buttons that launch the model directly
 
+**Private repository — internal use only.**
+
 ## Shalehaven Rock Quality Index (RQI) Model
 
 Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
 
 ## PUD Location Generator (`shp_pud`)
 
-Shalehaven's in-house undrilled-inventory engine, built to replace a paid inventory product with something we own and can calibrate. For each basin it learns how every operator actually develops every landing zone (in-zone spacing, stagger, lateral-length mix, 3-mile practice, wells per section) from the Novi horizontal-well database, then fills the undrilled space with laterals that follow that practice.
+Shalehaven's in-house undrilled-inventory engine, built to replace a paid inventory product with something we own and can calibrate. For each basin it learns how every operator actually develops every landing zone (in-zone spacing, stagger, lateral-length mix, 3-mile practice, wells per section) from a national horizontal-well database, then fills the undrilled space with laterals that follow that practice.
 
 **Coverage** — eleven Lower 48 basins: Delaware, Midland, Williston, DJ, Eagle Ford, Haynesville, Marcellus, Utica, Anadarko, Uinta, and Powder River.
 
@@ -85,7 +87,7 @@ Shalehaven's in-house undrilled-inventory engine, built to replace a paid invent
 - **Attribute** — each location carries its operator, lateral class, permit signal, parent wells, and any acreage-ownership gap along the stick (flagged as a leasing target, never a blocker)
 - **Categorize** — `PUD` inside the proven play, or `EMERGING` for step-outs and stacked pay
 - **Back-test** — every run is replayed as of an earlier date and scored on recall and precision against the wells drilled since
-- **Publish** — results go to SQL Server with stable names across runs, a live multi-basin QGIS project, and a weekly refresh after each Novi load
+- **Publish** — results go to SQL Server with stable names across runs, a live multi-basin QGIS project, and a weekly refresh after each well-data load
 
 **Scoring** — every location can be exported as an AFE Summary (capex fit from Shalehaven's own AFEs) and run unattended through the ShalehavenScripts economics model. Results are stored per location, with expected deal terms applied per basin, and reviewed on a scores dashboard.
 
@@ -93,7 +95,7 @@ Shalehaven's in-house undrilled-inventory engine, built to replace a paid invent
 
 ## Benchmarking Dashboard (`shp_research`)
 
-A Streamlit research tool for benchmarking operators and wells by **basin / subbasin / formation**, built on the weekly NoviLabs *US Horizontals* extract. A DuckDB-over-Parquet warehouse is rebuilt from the raw weekly drop, giving sub-second analytical SQL over 29M+ monthly-production rows.
+A Streamlit research tool for benchmarking operators and wells by **basin / subbasin / formation**, built on a weekly US horizontal-well data extract. A DuckDB-over-Parquet warehouse is rebuilt from the raw weekly drop, giving sub-second analytical SQL over 29M+ monthly-production rows.
 
 **Features**
 
