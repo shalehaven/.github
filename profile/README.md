@@ -34,82 +34,41 @@ Shalehaven Partners is a Dallas-based private oil and gas investment firm focuse
 
 ## ShalehavenScripts Overview
 
-Our primary codebase is a Python toolkit supporting the full internal workflow from deal ingestion and technical underwriting through economics, production surveillance, hedging, accounting reconciliation, and reporting. Third-party well data lives in a weekly-refreshed SQL Server warehouse; ComboCurve provides type-curve, production, forecast, and economic-model integration. Reporting has moved off Power BI onto self-contained HTML dashboards, refreshed from SQL with one click.
+Our primary codebase: a Python toolkit covering the full internal workflow, from deal ingestion and technical underwriting through economics, production, hedging, accounting, and reporting. Built on a SQL Server well-data warehouse and ComboCurve.
 
-**Core Scripts**
-
-- `main_run.py` — Daily orchestrator for the capital formation, production, and LOS pipelines (plus a weekly hedge-volume pull), with independent subprocess execution, a run lock, and SQL-backed run logging
-- `main_capital.py` — Publishes the investor tracker to SQL for capital formation reporting
-- `main_prod.py` — Full production run: deal pipeline, ComboCurve push/pull, operator-file normalization, downtime capture, the seven-day production report, and SQL merges
-- `main_los.py` — Well schedule, AFE, JIB, and revenue ETL; AFE-vs-actual reconciliation; and Lease Operating Statement reporting
-- `main_model.py` — AFE underwriting pipeline: auction or workbook ingestion, ComboCurve type-curve or radius-peer cohorts (per-zone widening ladder), data-calibrated lateral-length scaling, economics HTML/PDF and email delivery, with geology and operator analysis built alongside
-- `main_geology.py` — Builds a deal's regional geology report on its own, without running the model
-
-**Package Modules (`shalehavenscripts/`)**
-
-- `economics.py` — Per-well and portfolio economics (P10/P50/P90), ComboCurve assumption resolution, sensitivities, goal seek, and report generation
-- `orri.py` — ORRI sell-down analysis: what an overriding royalty carved out of the lease NRI is worth to a buyer, and what selling it does to the retained working interest
-- `lateral_scaling.py` / `normalization.py` — Data-calibrated lateral-length scaling exponents per basin × formation × county, and a standalone lateral-normalization study
-- `geology.py` — Regional geology deep-dive per landing zone, with statistically gated drivers of well performance
-- **Well-data layer** — Weekly warehouse refresh/read, offset cohort construction, subsurface and production analysis, interactive deal reports, and operator benchmarking
-- `auction.py` — Auction-export ingestion and AFE Summary project scaffolding
-- `afedatabase.py` — Registry of every modeled well's AFE for cost benchmarking
-- `combocurve.py` — ComboCurve client for wells, type curves, production, forecasts (including auto-forecast), directional surveys, and economic models
-- `production.py` — Operator production importers, ComboCurve-ready transformations, downtime capture, and the production dashboard
-- `hedging.py` — Swaps-only hedge book per fund, built from final deal economics and actuals, priced on the strip
-- `finance.py` — Loads every won deal's final economics into SQL for fund-level forecasts and returns
-- `los.py` / `wellschedule.py` — AFE, JIB, revenue, AFE-vs-actual, LOS, and well-schedule processing
-- `capitalformation.py` / `dealsheet.py` — Investor tracker and deal-pipeline ingestion and reporting
-- `rigwatch.py` / `timelapse.py` — Weekly rig activity near won deals, and an animated basin-development time-lapse
-- `pud_scores.py` — Review page for PUD locations priced through the model (see `shp_pud` below)
-- `sql.py` / `gis.py` — SQL Server access (staged loads, atomic view swaps, run logging) and spatial layers for live QGIS use
-- `tech.py` — Shared mail, branding, machine setup, and the `shalehaven://` link handler that lets report buttons run jobs
-- `ui/` — HTML report builders and their client-side JavaScript
-
-**HTML Reports**
-
-- **Economics report** — one self-contained page per deal with live, in-browser recalculation: Summary (editable cash promote / carry, per-well grid), AFE Overview, Assumptions, Cash Flow / Zone, Rollup, Sensitivity, Goal Seek, Risk Profile, and **ORRI** (value of selling down the lease NRI as an overriding royalty, with a buyer-discount-rate control and a PDF export)
-- **Operations dashboards** — production, deal pipeline, AFE vs actual, LOS, and hedge book, each refreshed from SQL by a button on the page
-- **Admin page** — every pipeline and load as a one-click job with live status, last-run history, and a status window that streams progress
-- **Model Runs page** — every AFE Summary in the current fund grouped by deal stage, with Run / Final buttons that launch the model directly
+- **Underwriting** — AFE ingestion, type-curve and offset-peer cohorts, lateral-length scaling, geology and operator analysis
+- **Economics** — P10/P50/P90 per-well and portfolio economics with sensitivities, goal seek, risk profile, and ORRI sell-down valuation
+- **Operations** — daily production, LOS, AFE-vs-actual, hedge book, and deal-pipeline pipelines
+- **Reporting** — self-contained HTML dashboards with live recalculation and one-click refresh, plus an admin page that runs every job
 
 **Private repository — internal use only.**
 
 ## Shalehaven Rock Quality Index (RQI) Model
 
-Shalehaven's proprietary subsurface ranking engine. The pipeline trains a separate machine-learning model against a full U.S. horizontal-well database, then scores every eligible horizontal well using rock-only inputs with cohort medians substituted for completion, spacing, and landing-precision features. The output is a percentile-ranked view of subsurface rock quality used internally to screen acreage and benchmark offset wells before capital is deployed. **Private repository — internal use only; not publicly distributed.**
+Shalehaven's proprietary subsurface ranking engine. It trains machine-learning models per formation and sub-basin on rock-only inputs, then percentile-ranks every horizontal well by rock quality.
+
+- **Screening** — rank acreage on rock quality before capital is deployed
+- **Benchmarking** — separate rock quality from completion and operator effects on offset wells
+
+**Private repository — internal use only.**
 
 ## PUD Location Generator (`shp_pud`)
 
-Shalehaven's in-house undrilled-inventory engine, built to replace a paid inventory product with something we own and can calibrate. For each basin it learns how every operator actually develops every landing zone (in-zone spacing, stagger, lateral-length mix, 3-mile practice, wells per section) from a national horizontal-well database, then fills the undrilled space with laterals that follow that practice.
+Shalehaven's in-house undrilled-inventory model. For each basin it learns how every operator develops every landing zone (spacing, stagger, lateral length, wells per section), then fills the undrilled space with locations that follow that practice.
 
-**Coverage** — eleven Lower 48 basins: Delaware, Midland, Williston, DJ, Eagle Ford, Haynesville, Marcellus, Utica, Anadarko, Uinta, and Powder River.
-
-**How it works**
-
-- **Resolve and learn** — generic formation tags are resolved to a landing zone, then spacing, stagger, and lateral rules are learned per operator × zone, falling back to operator, basin-zone, and basin levels
-- **Place** — sticks hang off existing wells at the operator's spacing, cut on real drilling units (PLSS sections in New Mexico, RRC surveys in Texas), and trimmed to free space around every producing, DUC, and permitted lateral
-- **Attribute** — each location carries its operator, lateral class, permit signal, parent wells, and any acreage-ownership gap along the stick (flagged as a leasing target, never a blocker)
-- **Categorize** — `PUD` inside the proven play, or `EMERGING` for step-outs and stacked pay
-- **Back-test** — every run is replayed as of an earlier date and scored on recall and precision against the wells drilled since
-- **Publish** — results go to SQL Server with stable names across runs, a live multi-basin QGIS project, and a weekly refresh after each well-data load
-
-**Scoring** — every location can be exported as an AFE Summary (capex fit from Shalehaven's own AFEs) and run unattended through the ShalehavenScripts economics model. Results are stored per location, with expected deal terms applied per basin, and reviewed on a scores dashboard.
+- **Coverage** — eleven Lower 48 basins, placed on real drilling units
+- **Calibrated** — every run is back-tested against the wells actually drilled since
+- **Priced** — every location runs through the ShalehavenScripts economics model
 
 **Private repository — internal use only.**
 
 ## Benchmarking Dashboard (`shp_research`)
 
-A Streamlit research tool for benchmarking operators and wells by **basin / subbasin / formation**, built on a weekly US horizontal-well data extract. A DuckDB-over-Parquet warehouse is rebuilt from the raw weekly drop, giving sub-second analytical SQL over 29M+ monthly-production rows.
+A Streamlit research tool for benchmarking operators and wells by basin, sub-basin, and formation, built on a weekly-refreshed horizontal-well warehouse.
 
-**Features**
-
-- **Type curves** — normalized P10 / P50 / P90 production decline by operator or vintage, oil and gas tracked separately (per 1,000 ft lateral)
-- **Completion vs. performance** — proppant / fluid / stage-spacing intensity against productivity, with an in-cohort regression fit
-- **Geology-normalized operator skill** — a within-cohort regression of production on rock + completion separates operating skill from acreage quality, reporting the cross-validated R² so the ranking's trust is explicit
-- **Well cards** — paste a set of API10s to get per-well summary cards compared to their cohort median
-- **Gun barrel** — pick a reference well (map click or API10) and see a subsurface cross-section of nearby laterals, revealing bench stacking and spacing within the unit
-- **Oil/gas-first metrics** — BOE is deliberately secondary; gas drives returns in the Haynesville/Marcellus and is near-worthless in the oily Delaware, so each stream is benchmarked on its own
+- **Type curves** — normalized P10 / P50 / P90 decline by operator or vintage, oil and gas tracked separately
+- **Operator skill** — completion and performance analysis that separates operating skill from acreage quality
+- **Spacing** — well cards and gun-barrel cross-sections of nearby laterals
 
 **Private repository — internal use only.**
 
