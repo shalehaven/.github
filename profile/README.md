@@ -19,9 +19,9 @@ Shalehaven Partners is a Dallas-based private oil and gas investment firm focuse
 | Repository | Description | Language |
 |---|---|---|
 | [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Shalehaven's Internal Analysis and Economics Platform | Python |
-| [rqi](https://github.com/shalehaven/rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
+| [rqi](https://github.com/shalehaven/rqi) | Shalehaven's Internal Rock Quality Model | Python |
 | [shalehaven-platform](https://github.com/shalehaven/shalehaven-platform) | Shalehaven's Internal AI Platform | TypeScript |
-| [shp_pud](https://github.com/shalehaven/shp_pud) | Shalehaven Internal PUD Development Model | Python |
+| [shp_pud](https://github.com/shalehaven/shp_pud) | Shalehaven's Internal PUD Development Model | Python |
 | [shp_research](https://github.com/shalehaven/shp_research) | Shalehaven's Internal Research Platform | Python |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
