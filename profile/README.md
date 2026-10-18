@@ -18,11 +18,11 @@ Shalehaven Partners is a Dallas-based private oil and gas investment firm focuse
 
 | Repository | Description | Language |
 |---|---|---|
-| [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Python toolkit for technical underwriting, economics, production and accounting ETL, spatial analysis, and operational reporting | Python |
+| [ShalehavenScripts](https://github.com/shalehaven/ShalehavenScripts) | Shalehaven's Internal Analysis and Economics Platform | Python |
 | [rqi](https://github.com/shalehaven/rqi) | Rock Quality Index (RQI) training + scoring pipeline — trains per-cohort (Formation × Subbasin) models on the NoviLabs database and percentile-ranks every horizontal well by subsurface rock quality | Python |
-| [shalehaven-platform](https://github.com/shalehaven/shalehaven-platform) | Shalehaven's AI platform — an MCP server that gives Claude secure access to our well, production, finance and deal data, behind Microsoft Entra sign-in, with a small admin console | TypeScript |
-| [shp_pud](https://github.com/shalehaven/shp_pud) | PUD location generator — learns how each operator develops each landing zone from the Novi well database, fills undrilled space across eleven Lower 48 basins with laterals that follow that practice, back-tests against wells drilled since, and prices every location through the ShalehavenScripts economics model | Python |
-| [shp_research](https://github.com/shalehaven/shp_research) | Well & operator benchmarking dashboard — Streamlit app over the weekly NoviLabs warehouse (DuckDB): type curves, completion-vs-performance, geology-normalized operator skill, well cards, and gun-barrel subsurface spacing | Python |
+| [shalehaven-platform](https://github.com/shalehaven/shalehaven-platform) | Shalehaven's Internal AI Platform | TypeScript |
+| [shp_pud](https://github.com/shalehaven/shp_pud) | Shalehaven Internal PUD Development Model | Python |
+| [shp_research](https://github.com/shalehaven/shp_research) | Shalehaven's Internal Research Platform | Python |
 | [.github](https://github.com/shalehaven/.github) | Organization profile and documentation | — |
 
 ---
