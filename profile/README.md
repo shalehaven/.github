@@ -4,7 +4,12 @@
 
 [![Website](https://img.shields.io/badge/Website-shalehaven.com-blue?style=flat-square)](https://shalehaven.com)
 [![Location](https://img.shields.io/badge/HQ-Dallas%2C%20Texas-green?style=flat-square)](#contact)
-[![Language](https://img.shields.io/badge/Code-Python-yellow?style=flat-square)](https://github.com/shalehaven/ShalehavenScripts)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](#repositories)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](#repositories)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](#repositories)
+[![SQL](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white)](#repositories)
+[![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white)](#repositories)
+[![HTML/CSS](https://img.shields.io/badge/HTML%2FCSS-E34F26?style=flat-square&logo=html5&logoColor=white)](#repositories)
 
 ---
 
